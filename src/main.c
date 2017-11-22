@@ -2,6 +2,8 @@
 #include "user_i2c.h"
 #include "tb6612.h"
 
+#define I2C_BASE_ADDR           0x2d
+
 #define MODE_IN                 0x00
 #define MODE_OUT                0x01
 #define MODE_AF                 0x02        // Alternate function, e.g. USAT, SPI
@@ -84,14 +86,17 @@ int main()
         // Driver chip standby
         MODER(MODE_OUT, PIN_STBY);
 
+    // Set pins for address select to input mode
+    GPIOF->MODER |= MODER(MODE_IN, 0) | MODER(MODE_IN, 1);
+
     GPIOA->AFR[0] |= (1 << GPIO_AFRH_AFRH6_Pos) | (1 << GPIO_AFRH_AFRH7_Pos);
     GPIOA->AFR[1] |= (4 << GPIO_AFRH_AFRH1_Pos) | (4 << GPIO_AFRH_AFRH2_Pos);
 
     GPIOA->OTYPER |= GPIO_OTYPER_OT_9 | GPIO_OTYPER_OT_10;
     GPIOA->PUPDR |= GPIO_PUPDR_PUPDR9_0 | GPIO_PUPDR_PUPDR10_0;
 
-    // Set own I2C address to 0x30
-    I2C1->OAR1 = I2C_OAR1_OA1EN | (0x30 << 1);
+    // Set own I2C address using pins
+    I2C1->OAR1 = I2C_OAR1_OA1EN | ((I2C_BASE_ADDR + (GPIOF->IDR & 3)) << 1);
     // Enable I2C
     I2C1->CR1 = I2C_CR1_PE;
 
