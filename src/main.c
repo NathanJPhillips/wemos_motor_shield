@@ -12,7 +12,7 @@ volatile uint32_t timeout = 0;
 
 void SysTick_Handler(void)
 {
-    if (timeout)
+    if (timeout != 0)
         timeout--;
 }
 
@@ -22,7 +22,7 @@ int receive_cmd(uint8_t *buf, uint16_t count)
 
     // Clear the control register and wait until peripheral enable reports as cleared
     I2C1->CR1 = 0;
-    while (I2C1->CR1 & I2C_CR1_PE);
+    while ((I2C1->CR1 & I2C_CR1_PE) != 0);
 
     // Set peripheral enable and wait until it reports as set
     I2C1->CR1 = I2C_CR1_PE;
@@ -46,16 +46,16 @@ int receive_cmd(uint8_t *buf, uint16_t count)
 
     for (i = 0; i < count; i++) {
         // Wait until receive data register is empty
-        while (((I2C1->ISR & I2C_ISR_RXNE) == 0) && (timeout));
-        if (!timeout)
+        while (((I2C1->ISR & I2C_ISR_RXNE) == 0) && (timeout != 0));
+        if (timeout == 0)
             return -2;
         // Save the received data
         *buf++ = I2C1->RXDR;
     }
 
     // Wait until get stop interrupt, fail if don't get within the timeout
-    while (((I2C1->ISR & I2C_ISR_STOPF) == 0) && (timeout));
-    if (!timeout)
+    while (((I2C1->ISR & I2C_ISR_STOPF) == 0) && (timeout != 0));
+    if (timeout == 0)
         return -2;
     // Clear the stop interrupt
     I2C1->ICR = I2C_ICR_STOPCF;
