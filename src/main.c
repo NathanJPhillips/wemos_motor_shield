@@ -89,7 +89,7 @@ int main()
     GPIOA->PUPDR |= GPIO_PUPDR_PUPDR9_0 | GPIO_PUPDR_PUPDR10_0;
 
     // Set own I2C address to 0x30
-    I2C1->OAR1 = I2C_OAR1_OA1EN | 0x60;
+    I2C1->OAR1 = I2C_OAR1_OA1EN | (0x30 << 1);
     // Enable I2C
     I2C1->CR1 = I2C_CR1_PE;
 
