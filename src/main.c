@@ -13,7 +13,7 @@ volatile uint32_t timeout = 0;
 void SysTick_Handler(void)
 {
     if (timeout != 0)
-        timeout--;
+        --timeout;
 }
 
 int receive_cmd(uint8_t *buf, uint16_t count)
@@ -22,17 +22,17 @@ int receive_cmd(uint8_t *buf, uint16_t count)
 
     // Clear the control register and wait until peripheral enable reports as cleared
     I2C1->CR1 = 0;
-    while ((I2C1->CR1 & I2C_CR1_PE) != 0);
+    while ((I2C1->CR1 & I2C_CR1_PE) != 0) {}
 
     // Set peripheral enable and wait until it reports as set
     I2C1->CR1 = I2C_CR1_PE;
-    while ((I2C1->CR1 & I2C_CR1_PE) == 0);
+    while ((I2C1->CR1 & I2C_CR1_PE) == 0) {}
 
     // Clear all interrupts
     I2C1->ICR = 0xffffffff;
 
     // Wait for address matched (slave mode) interrupt
-    while ((I2C1->ISR & I2C_ISR_ADDR) == 0);
+    while ((I2C1->ISR & I2C_ISR_ADDR) == 0) {}
     // Clear this interrupt
     I2C1->ICR = I2C_ICR_ADDRCF;
 
